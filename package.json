@@ -1,0 +1,21 @@
+{
+  "name": "alto-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "elm-live src/Main.elm --port=8001 --dir=./src --start-page=index.html --pushstate -- --debug --output=src/elm.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cypress": "^10.9.0",
+    "elm": "^0.19.1-5",
+    "elm-format": "^0.8.5",
+    "elm-live": "^4.0.2",
+    "elm-review": "^2.7.5",
+    "elm-test": "^0.19.1-revision9"
+  }
+}
