@@ -4,21 +4,45 @@ import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 import Json.Decode as JD
+import Time exposing (Posix, Zone)
 
 type alias Model = 
     { screen : Screen }
 
+initialModel : Model
+initialModel =
+    { screen = Loading }
+
 type Screen
     = Loading
-    | Trip
+    | MyTrip
     | Driver
     | Vehicle
     | Vibe
 
+type alias Trip =
+    { arrival : Posix
+    , timeZone : Zone
+    , fareMin : Int
+    , fareMax : Int
+    , passengersMin : Int
+    , passengersMax : Int
+    , payment : String
+    , dropoff : Location
+    , pickup : Location
+    , notes : String }
 
-initialModel : Model
-initialModel =
-    { screen = Loading }
+type alias Location =
+    { name : Maybe String
+    , street1 : String
+    , street2 : String
+    , city : String
+    , state : String
+    , zipcode : String
+    , lat : Maybe String
+    , long : Maybe String }
+
+
 
 type Msg
     = Noop
@@ -35,7 +59,7 @@ view model =
     case model.screen of
         Loading ->
             div [][text "Loading..."]
-        Trip ->
+        MyTrip ->
             div [][text "Trip"]
         Driver ->
             div [][text "Driver"]
