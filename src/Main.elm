@@ -304,7 +304,7 @@ view model =
             div [class "m-auto w-[24px] h-[24px]"][img [src "images/Profile_icon.png"][]]
             , div [class "flex grow justify-center"][ 
                 div [class "text-alto-base text-alto-primary opacity-70"][
-                    p [class "font-semibold"][text "DFW Int'l Airport"]
+                    p [class "font-semibold"][text (getDestinationName model.tripData)]
                     , p [class "uppercase text-alto-title"][text "ETA: 5:39 PM"]
                 ]
             ]
@@ -387,5 +387,15 @@ viewDropoffLocation location =
                     , p[][text (locationToCityStateZip location)]
                 ]
     )
-    
-    
+
+getDestinationName : Maybe TripData -> String    
+getDestinationName tripDataMaybe =
+    case tripDataMaybe of
+        Nothing ->
+            "Cannot determine destination at this time."
+        Just tripData ->
+            case tripData.trip.dropoff.name of
+                Nothing ->
+                    tripData.trip.dropoff.street1
+                Just droppoffName ->
+                    droppoffName
