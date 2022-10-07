@@ -103,7 +103,7 @@ update msg model =
                     in
                     ( { model | tripData = Nothing, screen = ErrorScreen } , Cmd.none)
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = VehicleScreen }, Cmd.none )
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
 
@@ -253,7 +253,26 @@ view model =
                         
                         ]
                     VehicleScreen ->
-                        div [][text "Vehicle"]
+                        div [class "flex grow flex-col"][
+                            img [class "object-none object-[50%_39%]", src "images/Vehicle_photo.png"][]
+                            , h1 [class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8"][text "Your Vehicle"]
+                            , h2 [class "font-pxgrotesklight text-7xl tracking-tighter"][text "Alto 09"]
+                            , div [class "flex flex-row w-screen gap-8 pb-12 pt-8"][
+                                div [class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line"][
+                                    p [class "text-alto-title text-alto-primary opacity-75"][text "Make / Model"]
+                                    , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text "2019 Volkswagen Atlas"]
+                                ]
+                                , div [class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line"][
+                                    p [class "text-alto-title text-alto-primary opacity-75"][text "Color"]
+                                    , p [class "text-alto-base font-bold opacity-60"][text "Pure White"]
+                                ]
+                            ]
+                            , div [class "grow"][]
+                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen"][
+                                span [class "uppercase text-alto-base font-semibold text-alto-primary opacity-20"][text "Identify Vehicle"]
+                            ]
+                        
+                        ]
                     VibeScreen ->
                         div [][text "Vibe"]
                 , div [ class "mt-6 pt-2 flex flex-row w-screen border-t-2 border-t-solid border-t-alto-line"][
