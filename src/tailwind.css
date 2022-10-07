@@ -99,6 +99,19 @@ body {
   @apply m-0 h-full flex bg-alto-page-background;
 }
 
-body {
-  width: 100%;
+
+.dot {
+  height: 6px;
+  width: 6px;
+  background-color: #000000;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dotFade {
+  height: 7px;
+  width: 7px;
+  background-color: #D9D8CB;
+  border-radius: 50%;
+  display: inline-block;
 }

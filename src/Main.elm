@@ -89,6 +89,7 @@ type alias TripData =
 
 type Msg
     = GotTripData (Result Http.Error TripData)
+    | ShowScreen Screen
 
 
 update : Msg -> Model -> ( Model, Cmd Msg)
@@ -103,7 +104,8 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen } , Cmd.none)
                 Ok tripData ->
                     ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
-
+        ShowScreen screen ->
+            ( { model | screen = screen }, Cmd.none )
 
 init : JD.Value -> ( Model, Cmd Msg )
 init _ =
@@ -179,10 +181,11 @@ vibeDecoder =
 view : Model -> Html Msg 
 view model =
     div [][
-        div [class "h-screen"][
-            div [class "flex flex-col p-4"][ -- TODO/FIXME: This padding causes side-scrolling
-                div [class "flex flex-col bg-[#D9E0E6]"][
+        div [class "h-full"][
+            div [class "flex flex-col p-4 h-full justify-between"][ -- TODO/FIXME: This padding causes side-scrolling
+                div [class ("flex flex-col " ++ (getBGColor model.screen))][
                     div [class "m-auto pt-4 pb-4"][img [src "images/Alto_logo.png", class "w-[50px] h-[14px]"][]]
+                    , dots model.screen
                 ]
                 , case model.screen of
                     Loading ->
@@ -236,9 +239,17 @@ view model =
                         ]
                     DriverScreen ->
                         div [class "flex grow flex-col"][
-                            img [class "object-none object-[50%_44%]", src "images/Driver_photo.png"][]
+                            img [class "object-none object-[50%_39%]", src "images/Driver_photo.png"][]
                             , h1 [class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8"][text "Your Driver"]
-                            , h2 [class "font-pxgrotesklight text-7xl"][text "Steph"]
+                            , h2 [class "font-pxgrotesklight text-7xl tracking-tighter"][text "Steph"]
+                            , div [][
+                                div [class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line"][]
+                                , p [class "text-alto-title tracking-tight text-alto-primary opacity-75"][text "Steph Festiculma is a graduate of Parsons New School in New York and fluent in Portugeuse, Spanish and English. Steph has been driving with Alto since 2018."]
+                            ]
+                            , div [class "grow"][]
+                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen"][
+                                span [class "uppercase text-alto-base font-semibold text-alto-primary opacity-20"][text "Contact Driver"]
+                            ]
                         
                         ]
                     VehicleScreen ->
@@ -261,6 +272,24 @@ view model =
 
 getBGColor : Screen -> String
 getBGColor screen =
-    case screen of
-        DriverScreen -> "bg-[#D9E0E6]"
-        _ -> "bg-alto-page-background"
+    if screen == DriverScreen then
+        "bg-[#D9E0E6]"
+    else
+        " "
+
+dots : Screen -> Html Msg
+dots screen =
+    div [class "absolute top-12 right-4 flex flex-col gap-1"][
+        div [class (getDotClass screen TripScreen), onClick (ShowScreen TripScreen)][]
+        , div [class (getDotClass screen DriverScreen), onClick (ShowScreen DriverScreen)][]
+        , div [class (getDotClass screen VehicleScreen), onClick (ShowScreen VehicleScreen)][]
+        , div [class (getDotClass screen VibeScreen), onClick (ShowScreen VibeScreen)][]
+        , div [class (getDotClass screen ErrorScreen), onClick (ShowScreen ErrorScreen)][]
+    ]
+
+getDotClass : Screen -> Screen -> String
+getDotClass screenA screenB =
+    if screenA == screenB then
+        "dot"
+    else
+        "dotFade"
