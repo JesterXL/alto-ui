@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, button, div, h1, h2, img, p, span, text)
-import Html.Attributes exposing (class, src)
+import Html.Attributes exposing (class, src, disabled)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as JD
@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -197,8 +197,15 @@ driverDecoder =
         (JD.field "name" JD.string)
         (JD.field "image" JD.string)
         (JD.field "bio" JD.string)
-        (JD.maybe (JD.field "phone" JD.string))
+        (JD.maybe (JD.field "phone" JD.string) |> JD.andThen validatePhone)
 
+validatePhone phoneMaybe =
+    case phoneMaybe of
+        Nothing -> JD.succeed Nothing
+        Just phone ->
+            case phone of
+                "" -> JD.succeed Nothing
+                _ -> JD.succeed (Just phone)
 
 vehicleDecoder =
     JD.map4 Vehicle
@@ -284,17 +291,19 @@ view model =
 
                     DriverScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ img [ class "object-none object-[50%_39%]", src "images/Driver_photo.png" ] []
+                            [ img [ class "object-none object-[50%_39%]", src tripData.driver.image ] []
                             , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Driver" ]
-                            , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text "Steph" ]
+                            , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.driver.name ]
                             , div []
                                 [ div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
-                                , p [ class "text-alto-title tracking-tight text-alto-primary opacity-75" ] [ text "Steph Festiculma is a graduate of Parsons New School in New York and fluent in Portugeuse, Spanish and English. Steph has been driving with Alto since 2018." ]
+                                , p [ class "text-alto-title tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
                                 ]
                             , div [ class "grow" ] []
-                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen" ]
-                                [ span [ class "uppercase text-alto-base font-semibold text-alto-primary opacity-20" ] [ text "Contact Driver" ]
-                                ]
+                            , case tripData.driver.phone of
+                                Nothing ->
+                                    viewButton "Contact Driver" False []
+                                Just _ ->
+                                    viewButton "Contact Driver" True []
                             ]
 
                     VehicleScreen ->
@@ -363,7 +372,7 @@ getBGColor screen =
 
 dots : Screen -> Html Msg
 dots screen =
-    div [ class "absolute top-12 right-4 flex flex-col gap-1" ]
+    div [ class "absolute top-12 right-8 flex flex-col gap-1" ]
         [ div [ class (getDotClass screen TripScreen), onClick (ShowScreen TripScreen) ] []
         , div [ class (getDotClass screen DriverScreen), onClick (ShowScreen DriverScreen) ] []
         , div [ class (getDotClass screen VehicleScreen), onClick (ShowScreen VehicleScreen) ] []
@@ -504,3 +513,36 @@ militaryHourToRegularHour time =
         time
     else
         time - 12
+
+viewButton : String -> Bool -> List (Html.Attribute Msg) -> Html Msg
+viewButton label enabled attributes =
+    if enabled == True then
+        button 
+            ([ class enabledButtonStyles ] ++ attributes)
+            [ span 
+                [ class enabledButtonTextStyles ] 
+                [ text label ]
+            ]
+    else
+        button 
+            ([ class disabledButtonStyles, disabled False ] ++ attributes)
+            [ span 
+                [ class disabledButtonTextStyles ] 
+                [ text label ]
+            ]
+
+disabledButtonStyles : String
+disabledButtonStyles =
+    "mt-4 p-4 border-2 border-solid border-alto-line w-screen"
+
+disabledButtonTextStyles : String
+disabledButtonTextStyles =
+    "uppercase text-alto-base font-semibold text-alto-primary opacity-20"
+
+enabledButtonStyles : String
+enabledButtonStyles =
+    "mt-4 p-4 border-2 border-solid border-alto-line w-screen bg-alto-dark"
+
+enabledButtonTextStyles : String
+enabledButtonTextStyles =
+    "uppercase text-alto-base font-semibold text-white"

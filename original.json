@@ -30,7 +30,7 @@
     },
     "driver": {
       "name": "Steph",
-      "image": "../images/Driver_photo.png",
+      "image": "images/Driver_photo.png",
       "bio": "Steph Festiculma is a graduate of Parsons New School in New York and fluent in Portugeuse, Spanish and English. Steph has been driving with Alto since 2018.",
       "phone": ""
     },
@@ -38,7 +38,7 @@
       "license": "Alto 09",
       "make": "2019 Volkswagen Atlas",
       "color": "Pure White",
-      "image": "../images/Vehicle_photo.png"
+      "image": "images/Vehicle_photo.png"
     },
     "vibe": {
       "name": "Vaporwave Beats"
