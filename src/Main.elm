@@ -4,74 +4,182 @@ import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 import Json.Decode as JD
-import Time exposing (Posix, Zone)
+import Time exposing (Posix, Zone, millisToPosix, utc)
+import Http
 
 type alias Model = 
-    { screen : Screen }
+    { screen : Screen
+    , tripData : Maybe TripData  }
 
 initialModel : Model
 initialModel =
-    { screen = Loading }
+    { screen = Loading
+    , tripData = Nothing }
 
 type Screen
     = Loading
-    | MyTrip
-    | Driver
-    | Vehicle
-    | Vibe
+    | ErrorScreen
+    | TripScreen
+    | DriverScreen
+    | VehicleScreen
+    | VibeScreen
 
 type alias Trip =
     { arrival : Posix
     , timeZone : Zone
-    , fareMin : Int
-    , fareMax : Int
-    , passengersMin : Int
-    , passengersMax : Int
+    , fare : Fare
+    , passengers : Passengers
     , payment : String
     , dropoff : Location
     , pickup : Location
     , notes : String }
 
+type alias Fare =
+    { min : Int
+    , max : Int }
+
+type alias Passengers =
+    { min : Int 
+    , max : Int }
+
 type alias Location =
     { name : Maybe String
     , street1 : String
-    , street2 : String
+    , street2 : Maybe String
     , city : String
     , state : String
     , zipcode : String
     , lat : Maybe String
     , long : Maybe String }
 
+type alias Driver =
+    { name : String
+    , image : String
+    , bio : String
+    , phone : Maybe String }
 
+type alias Vehicle =
+    { license : String
+    , make : String
+    , color : String
+    , image : String }
+
+type alias Vibe =
+    { name : String }
+
+type alias TripData =
+    { trip : Trip 
+    , driver : Driver 
+    , vehicle : Vehicle
+    , vibe : Vibe }
 
 type Msg
-    = Noop
+    = GotTripData (Result Http.Error TripData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg)
 update msg model =
     case msg of
-        Noop ->
-            ( model, Cmd.none )
+        GotTripData result ->
+            case result of
+                Err err ->
+                    let
+                        _ = Debug.log "trip data failed" err
+                    in
+                    ( { model | tripData = Nothing, screen = ErrorScreen } , Cmd.none)
+                Ok tripData ->
+                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
 
 view : Model -> Html Msg 
 view model =
     case model.screen of
         Loading ->
             div [][text "Loading..."]
-        MyTrip ->
+        ErrorScreen ->
+            div [][
+                text "We failed to load your trip data. Please try again in a few seconds."
+                , button [][ text "Retry"] 
+            ]
+        TripScreen ->
             div [][text "Trip"]
-        Driver ->
+        DriverScreen ->
             div [][text "Driver"]
-        Vehicle ->
+        VehicleScreen ->
             div [][text "Vehicle"]
-        Vibe ->
+        VibeScreen ->
             div [][text "Vibe"]
 
 
 init : JD.Value -> ( Model, Cmd Msg )
 init _ =
-    ( initialModel, Cmd.none )
+    ( 
+        initialModel
+        , Http.get
+            { url = "http://localhost:3000"
+            , expect = Http.expectJson GotTripData tripDataDecoder
+            }
+    )
+
+tripDataDecoder =
+    JD.map4 TripData
+        (JD.field "trip" tripDecoder)
+        (JD.field "driver" driverDecoder)
+        (JD.field "vehicle" vehicleDecoder)
+        (JD.field "vibe" vibeDecoder)
+
+tripDecoder =
+    JD.map8 Trip
+        (JD.field "estimated_arrival_posix" JD.int |> JD.andThen posixDecoder )
+        (JD.succeed utc)
+        fareDecoder
+        passsengersDecoder
+        (JD.field "payment" JD.string)
+        (JD.field "dropoff_location" locationDecoder)
+        (JD.field "pickup_location" locationDecoder)
+        (JD.field "notes" JD.string)
+
+posixDecoder millis =
+    JD.succeed (millisToPosix millis)
+
+fareDecoder =
+    JD.map2 Fare
+        (JD.field "estimated_fare_min" JD.int)
+        (JD.field "estimated_fare_max" JD.int)
+
+passsengersDecoder =
+    JD.map2 Passengers
+        (JD.field "passengers_min" JD.int)
+        (JD.field "passengers_max" JD.int)
+
+locationDecoder =
+    JD.map8 Location
+        (JD.maybe (JD.field "name" JD.string))
+        (JD.field "street_line1" JD.string)
+        (JD.maybe (JD.field "street_line2" JD.string))
+        (JD.field "city" JD.string)
+        (JD.field "state" JD.string)
+        (JD.field "zipcode" JD.string)
+        (JD.maybe (JD.field "lat" JD.string))
+        (JD.maybe (JD.field "long" JD.string))
+
+driverDecoder =
+    JD.map4 Driver
+        (JD.field "name" JD.string)
+        (JD.field "image" JD.string)
+        (JD.field "bio" JD.string)
+        (JD.maybe (JD.field "phone" JD.string))
+
+vehicleDecoder =
+    JD.map4 Vehicle
+        (JD.field "license" JD.string)
+        (JD.field "make" JD.string)
+        (JD.field "color" JD.string)
+        (JD.field "image" JD.string)
+
+vibeDecoder =
+    JD.map Vibe
+        (JD.field "name" JD.string)
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
