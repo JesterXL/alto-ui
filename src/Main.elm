@@ -6,16 +6,43 @@ import Html.Events exposing (onClick)
 import Url
 import Json.Decode as JD
 import Browser.Navigation as Nav
+import Url.Parser as UrlParser
 
 type alias Model =
     { key : Nav.Key
-    , url : Url.Url }
+    , url : Url.Url
+    , route : Route }
+
+type Route
+    = Loading
+    | NotFound
+    | Trip
+    | Driver
+    | Vehicle
+    | Destination
+
+routeParser : UrlParser.Parser (Route -> a) a
+routeParser =
+    UrlParser.oneOf
+        [ UrlParser.map Loading UrlParser.top
+        , UrlParser.map Trip (UrlParser.s "trip")
+        , UrlParser.map Driver (UrlParser.s "driver")
+        , UrlParser.map Vehicle (UrlParser.s "vehicle")
+        , UrlParser.map Destination (UrlParser.s "destination")
+        ]
+
+
+parseRoute : Url.Url -> Route
+parseRoute url =
+    UrlParser.parse routeParser url
+        |> Maybe.withDefault NotFound
 
 initialModel : Nav.Key -> Url.Url -> Model
 
 initialModel key url =
     { key = key 
-    , url = url }
+    , url = url
+    , route = parseRoute url }
 
 type Msg
     = LinkClicked Browser.UrlRequest
@@ -27,15 +54,27 @@ update msg model =
     case msg of
         LinkClicked _ ->
             ( model, Cmd.none )
-        UrlChanged _ ->
-            ( model, Cmd.none )
+        UrlChanged url ->
+            ( { model | url = url, route = parseRoute url }, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
-view _ =
-    { title = "Sup"
+view model =
+    { title = "Alto"
     , body = [ div []
-        [ div [][text "Hey"]
+        [ case model.route of
+            Loading ->
+                div [][text "Loading..."]
+            NotFound ->
+                div [][text "404 Not Found"]
+            Trip ->
+                div [][text "Trip"]
+            Driver ->
+                div [][text "Driver"]
+            Vehicle ->
+                div [][text "Vehicle"]
+            Destination ->
+                div [][text "Destination"]
         ]
     ] }
 
