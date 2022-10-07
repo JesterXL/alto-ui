@@ -103,7 +103,7 @@ update msg model =
                     in
                     ( { model | tripData = Nothing, screen = ErrorScreen } , Cmd.none)
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = VehicleScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = VibeScreen }, Cmd.none )
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
 
@@ -182,9 +182,9 @@ view : Model -> Html Msg
 view model =
     div [][
         div [class "h-full"][
-            div [class "flex flex-col p-4 h-full justify-between"][ -- TODO/FIXME: This padding causes side-scrolling
+            div [class "flex flex-col h-full justify-between"][ -- TODO/FIXME: This padding causes side-scrolling
                 div [class ("flex flex-col " ++ (getBGColor model.screen))][
-                    div [class "m-auto pt-4 pb-4"][img [src "images/Alto_logo.png", class "w-[50px] h-[14px]"][]]
+                    div [class "m-auto pt-4 pb-4 z-10"][img [src "images/Alto_logo.png", class "w-[50px] h-[14px]"][]]
                     , dots model.screen
                 ]
                 , case model.screen of
@@ -274,7 +274,28 @@ view model =
                         
                         ]
                     VibeScreen ->
-                        div [][text "Vibe"]
+                        div [class "flex grow flex-col"][
+                            -- TODO/FIXME: this works with the whole absolute + top-4 thing,
+                            -- but the rest of the flex content gets confused
+                            img [class "vibeMask top-4 absolute", src "images/Map_overview.png"][]
+                            , img [class "top-60 right-4 absolute", src "images/Map_icon.png"][]
+                            , h1 [class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8"][text "Your Trip"]
+                            , h2 [class "font-pxgrotesklight text-7xl"][
+                                text "5:39 "
+                                , span [class "text-3xl uppercase"][text "pm"]
+                            ]
+                            , p [class "pb-8 text-alto-base text-alto-primary"][text "Estimated arrival at DFW Int'l Airport - Terminal E"]
+                            , div [class "flex flex-col w-screen pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line"][
+                                p [class "text-alto-title text-alto-primary opacity-75"][text "Current Vibe"]
+                                , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text "Vaporwave Beats"]
+                            ]
+                            , div [class "grow"][]
+                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen bg-alto-dark" ][
+                                span [class "uppercase text-alto-base font-semibold text-white"][text "Change Vehicle Vibe"]
+                            ]
+                        
+                        ]
+
                 , div [ class "mt-6 pt-2 flex flex-row w-screen border-t-2 border-t-solid border-t-alto-line"][
                     div [class "m-auto w-[24px] h-[24px]"][img [src "images/Profile_icon.png"][]]
                     , div [class "flex grow w-screen justify-center"][ 

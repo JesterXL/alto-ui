@@ -115,3 +115,7 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
+
+.vibeMask {
+  mask-image: linear-gradient(to top, transparent 25%, black 75%)
+}
