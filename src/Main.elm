@@ -5,7 +5,7 @@ import Html exposing (Html, div, text, button, img, h1, h2, span, p)
 import Html.Attributes exposing (src, class)
 import Html.Events exposing (onClick)
 import Json.Decode as JD
-import Time exposing (Posix, Zone, millisToPosix, utc)
+import Time exposing (Posix, Zone, millisToPosix, utc, toHour, toMinute, toSecond)
 import Http
 
 main : Program JD.Value Model Msg
@@ -305,7 +305,7 @@ view model =
             , div [class "flex grow justify-center"][ 
                 div [class "text-alto-base text-alto-primary opacity-70"][
                     p [class "font-semibold"][text (getDestinationName model.tripData)]
-                    , p [class "uppercase text-alto-title"][text "ETA: 5:39 PM"]
+                    , p [class "uppercase text-alto-title"][text (getETA model.tripData)]
                 ]
             ]
             , div [class "m-auto w-[24px] h-[24px]"][img [src "images/Vibes_icon.png"][]]
@@ -399,3 +399,42 @@ getDestinationName tripDataMaybe =
                     tripData.trip.dropoff.street1
                 Just droppoffName ->
                     droppoffName
+
+
+
+toUtcString : Time.Posix -> String
+toUtcString time =
+    String.fromInt (toHour utc time)
+    ++ ":" ++
+    String.fromInt (toMinute utc time)
+    ++ ":" ++
+    String.fromInt (toSecond utc time)
+    ++ " (UTC)"
+
+getETA : Maybe TripData -> String
+getETA tripDataMaybe =
+    case tripDataMaybe of
+        Nothing ->
+            "Caculating ETA..."
+        Just tripData ->
+             "ETA: " ++ (utcTimeToHoursMinutes tripData.trip.arrival) ++ " " ++ (getAMorPM (toHour utc time))
+
+getAMorPM : Int -> String
+getAMorPM hour =
+    if hour == 12 then
+        "pm"
+    else if hour == 24 then
+        "am"
+    else if hour >= 1 && hour <= 11 then
+        "am"
+    else if hour >= 12 && hour < 24 then
+        "pm"
+    else
+        "??"
+        
+utcTimeToHoursMinutes : Time.Posix -> String
+utcTimeToHoursMinutes time =
+    String.fromInt (toHour utc time)
+    ++ ":" ++
+    String.fromInt (toMinute utc time)
+
