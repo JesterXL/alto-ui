@@ -102,7 +102,7 @@ update msg model =
                     in
                     ( { model | tripData = Nothing, screen = ErrorScreen } , Cmd.none)
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
 
 
 init : JD.Value -> ( Model, Cmd Msg )
@@ -178,72 +178,89 @@ vibeDecoder =
 
 view : Model -> Html Msg 
 view model =
-    div [class "flex flex-col pl-4 pr-4 h-screen"][
-        div [class "m-auto pt-4 pb-4"][img [src "images/Alto_logo.png", class "w-[50px] h-[14px]"][]]
-        , case model.screen of
-            Loading ->
-                div [][text "Loading..."]
-            ErrorScreen ->
-                div [][
-                    text "We failed to load your trip data. Please try again in a few seconds."
-                    , button [][ text "Retry"] 
+    div [][
+        div [class "h-screen"][
+            div [class "flex flex-col p-4"][ -- TODO/FIXME: This padding causes side-scrolling
+                div [class "flex flex-col bg-[#D9E0E6]"][
+                    div [class "m-auto pt-4 pb-4"][img [src "images/Alto_logo.png", class "w-[50px] h-[14px]"][]]
                 ]
-            TripScreen ->
-                div [class "flex grow flex-col"][
-                    h1 [class "font-optima text-4xl pt-10 pb-10"][text "Your Trip"]
-                    , h2 [class "font-pxgrotesk text-7xl"][
-                        text "5:39 "
-                        , span [class "text-3xl uppercase"][text "pm"]
-                    ]
-                    , p [class "pb-8 text-alto-base text-alto-primary"][text "Estimated arrival at DFW Int'l Airport - Terminal E"]
-                    , div [class "flex flex-row w-screen gap-8 pb-12"][
-                        div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
-                            p [class "text-alto-title text-alto-primary opacity-75"][text "Estimated Fare:"]
-                            , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text "$65 - $75", span [][img [src "images/Info_icon.png", class "w-[13px] h-[13px]"][]]]
+                , case model.screen of
+                    Loading ->
+                        div [][text "Loading..."]
+                    ErrorScreen ->
+                        div [][
+                            text "We failed to load your trip data. Please try again in a few seconds."
+                            , button [][ text "Retry"] 
                         ]
-                        , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
-                            p [class "text-alto-title text-alto-primary opacity-75"][text "Passengers:"]
-                            , p [class "text-alto-base font-bold opacity-60"][text "1 - 5"]
+                    TripScreen ->
+                        div [class "flex grow flex-col"][
+                            h1 [class "font-optima text-4xl pt-10 pb-10"][text "Your Trip"]
+                            , h2 [class "font-pxgrotesk text-7xl"][
+                                text "5:39 "
+                                , span [class "text-3xl uppercase"][text "pm"]
+                            ]
+                            , p [class "pb-8 text-alto-base text-alto-primary"][text "Estimated arrival at DFW Int'l Airport - Terminal E"]
+                            , div [class "flex flex-row w-screen gap-8 pb-12"][
+                                div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                                    p [class "text-alto-title text-alto-primary opacity-75"][text "Estimated Fare:"]
+                                    , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text "$65 - $75", span [][img [src "images/Info_icon.png", class "w-[13px] h-[13px]"][]]]
+                                ]
+                                , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                                    p [class "text-alto-title text-alto-primary opacity-75"][text "Passengers:"]
+                                    , p [class "text-alto-base font-bold opacity-60"][text "1 - 5"]
+                                ]
+                                , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                                    p[class "text-alto-title text-alto-primary opacity-75"][text "Payment:"]
+                                    , p [class "text-alto-base font-bold opacity-60"][text "Amex01"]
+                                ]
+                            ]
+                            , div [class "pb-2 text-alto-base text-alto-primary opacity-75"][
+                                    p [][text "449 Flora St."]
+                                    , p [][text "Dallas, Texas 75201"]
+                                ]
+                            , div [class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line"][]
+                            , div [class "pb-4 text-alto-base text-alto-primary font-bold opacity-75"][
+                                p[][text "DFW International Airport"]
+                                , p[][text "American Airlines Terminal E"]
+                                , p[][text "Irving, Texas 75261"]
+                            ]
+                            , div [class "flex flex-row gap-4 items-center text-alto-base text-alto-primary opacity-75"][
+                                p[][text "Can you drop me off at AA International Bag Drop please?"]
+                                , img [src "images/Edit_icon.png", class "w-[10px] h-[10px]"][]
+                            ]
+                            , div [class "grow"][]
+                            , button [ class "p-4 border-2 border-solid border-alto-line w-screen"][
+                                span [class "uppercase text-alto-base font-semibold text-alto-primary opacity-20"][text "Cancel Trip"]
+                            ]
+                        
                         ]
-                        , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
-                            p[class "text-alto-title text-alto-primary opacity-75"][text "Payment:"]
-                            , p [class "text-alto-base font-bold opacity-60"][text "Amex01"]
+                    DriverScreen ->
+                        div [class "flex grow flex-col"][
+                            img [class "object-none object-[50%_44%]", src "images/Driver_photo.png"][]
+                            , h1 [class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8"][text "Your Driver"]
+                            , h2 [class "font-pxgrotesklight text-7xl"][text "Steph"]
+                        
+                        ]
+                    VehicleScreen ->
+                        div [][text "Vehicle"]
+                    VibeScreen ->
+                        div [][text "Vibe"]
+                , div [ class "mt-6 pt-2 flex flex-row w-screen border-t-2 border-t-solid border-t-alto-line"][
+                    div [class "m-auto w-[24px] h-[24px]"][img [src "images/Profile_icon.png"][]]
+                    , div [class "flex grow w-screen justify-center"][ 
+                        div [class "text-alto-base text-alto-primary opacity-70"][
+                            p [class "font-semibold"][text "DFW Int'l Airport"]
+                            , p [class "uppercase text-alto-title"][text "ETA: 5:39 PM"]
                         ]
                     ]
-                    , div [class "pb-2 text-alto-base text-alto-primary opacity-75"][
-                            p [][text "449 Flora St."]
-                            , p [][text "Dallas, Texas 75201"]
-                        ]
-                    , div [class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line"][]
-                    , div [class "pb-4 text-alto-base text-alto-primary font-bold opacity-75"][
-                        p[][text "DFW International Airport"]
-                        , p[][text "American Airlines Terminal E"]
-                        , p[][text "Irving, Texas 75261"]
-                    ]
-                    , div [class "flex flex-row gap-4 items-center text-alto-base text-alto-primary opacity-75"][
-                        p[][text "Can you drop me off at AA International Bag Drop please?"]
-                        , img [src "images/Edit_icon.png", class "w-[10px] h-[10px]"][]
-                    ]
-                    , div [class "grow"][]
-                    , button [ class "p-4 border-2 border-solid border-alto-line w-screen"][
-                        span [class "uppercase text-alto-base font-semibold text-alto-primary opacity-20"][text "Cancel Trip"]
-                    ]
-                
-                ]
-            DriverScreen ->
-                div [][text "Driver"]
-            VehicleScreen ->
-                div [][text "Vehicle"]
-            VibeScreen ->
-                div [][text "Vibe"]
-        , div [ class "mt-6 pt-2 flex flex-row w-screen border-t-2 border-t-solid border-t-alto-line"][
-            div [class "m-auto w-[24px] h-[24px]"][img [src "images/Profile_icon.png"][]]
-            , div [class "flex grow w-screen justify-center"][ 
-                div [class "text-alto-base text-alto-primary opacity-70"][
-                    p [class "font-semibold"][text "DFW Int'l Airport"]
-                    , p [class "uppercase text-alto-title"][text "ETA: 5:39 PM"]
+                    , div [class "m-auto w-[24px] h-[24px]"][img [src "images/Vibes_icon.png"][]]
                 ]
             ]
-            , div [class "m-auto w-[24px] h-[24px]"][img [src "images/Vibes_icon.png"][]]
         ]
     ]
+
+getBGColor : Screen -> String
+getBGColor screen =
+    case screen of
+        DriverScreen -> "bg-[#D9E0E6]"
+        _ -> "bg-alto-page-background"
