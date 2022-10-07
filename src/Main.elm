@@ -1,11 +1,25 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div, text, button, img, h1, h2, span, p)
+import Html.Attributes exposing (src, class)
 import Html.Events exposing (onClick)
 import Json.Decode as JD
 import Time exposing (Posix, Zone, millisToPosix, utc)
 import Http
+
+main : Program JD.Value Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
 
 type alias Model = 
     { screen : Screen
@@ -90,25 +104,6 @@ update msg model =
                 Ok tripData ->
                     ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
 
-view : Model -> Html Msg 
-view model =
-    case model.screen of
-        Loading ->
-            div [][text "Loading..."]
-        ErrorScreen ->
-            div [][
-                text "We failed to load your trip data. Please try again in a few seconds."
-                , button [][ text "Retry"] 
-            ]
-        TripScreen ->
-            div [][text "Trip"]
-        DriverScreen ->
-            div [][text "Driver"]
-        VehicleScreen ->
-            div [][text "Vehicle"]
-        VibeScreen ->
-            div [][text "Vibe"]
-
 
 init : JD.Value -> ( Model, Cmd Msg )
 init _ =
@@ -181,15 +176,45 @@ vibeDecoder =
         (JD.field "name" JD.string)
 
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
-
-main : Program JD.Value Model Msg
-main =
-    Browser.element
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+view : Model -> Html Msg 
+view model =
+    case model.screen of
+        Loading ->
+            div [][text "Loading..."]
+        ErrorScreen ->
+            div [][
+                text "We failed to load your trip data. Please try again in a few seconds."
+                , button [][ text "Retry"] 
+            ]
+        TripScreen ->
+            div [][
+                div [][ 
+                    img [src "images/Alto_logo.png"][]
+                    , h1 [class "font-optima text-4xl"][text "Your Trip"]
+                    , h2 [class "font-pxgrotesk text-7xl"][
+                        text "5:39 "
+                        , span [class "text-3xl uppercase"][text "pm"]
+                    ]
+                    , p [][text "Estimated arrival at DFW Int'l Airport - Terminal E"]
+                    , div [class "flex flex-row w-screen gap-8"][
+                        div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                            p [][text "Estimated Fare:"]
+                            , p [][text "$65 - $75", span [][text "icon"]]
+                        ]
+                        , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                            p [][text "Passengers:"]
+                            , p [][text "1 - 5"]
+                        ]
+                        , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
+                            p[][text "Payment:"]
+                            , p [][text "Amex01"]
+                        ]
+                    ]
+                ]
+            ]
+        DriverScreen ->
+            div [][text "Driver"]
+        VehicleScreen ->
+            div [][text "Vehicle"]
+        VibeScreen ->
+            div [][text "Vibe"]

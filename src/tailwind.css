@@ -1,10 +1,102 @@
+@font-face {
+  font-family: "Optima Black";
+  src: url("fonts/Linotype - OptimaLTStd-Black.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Black Italic";
+  src: url("fonts/Linotype - OptimaLTStd-BlackItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Bold";
+  src: url("fonts/Linotype - OptimaLTStd-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Bold Italic";
+  src: url("fonts/Linotype - OptimaLTStd-BoldItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Demi Bold";
+  src: url("fonts/Linotype - OptimaLTStd-DemiBold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Demi Bold Italic";
+  src: url("fonts/Linotype - OptimaLTStd-DemiBoldItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Extra Black";
+  src: url("fonts/Linotype - OptimaLTStd-ExtraBlack.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Italic";
+  src: url("fonts/Linotype - OptimaLTStd-Italic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Medium";
+  src: url("fonts/Linotype - OptimaLTStd-Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Medium Italic";
+  src: url("fonts/Linotype - OptimaLTStd-MediumItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima Black Italic";
+  src: url("fonts/Linotype - OptimaLTStd-BlackItalic.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Optima";
+  src: url("fonts/Linotype - OptimaLTStd.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "PxGrotesk-Bold";
+  src: url("fonts/PxGrotesk-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "PxGrotesk-Boldlta";
+  src: url("fonts/PxGrotesk-Boldlta.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "PxGrotesk-Light";
+  src: url("fonts/PxGrotesk-Light.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Px Grotesk";
+  src: url("fonts/PxGrotesk-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "PxGrotesk-Regularlta";
+  src: url("fonts/PxGrotesk-Regularlta.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "PxGrotesk-Screen";
+  src: url("fonts/PxGrotesk-Screen.otf") format("opentype");
+}
+
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html,
 body {
-  @apply m-0 h-full flex bg-gray-100;
+  @apply m-0 h-full flex bg-alto-page-background;
 }
 
 body {

@@ -36,7 +36,6 @@ const stopServer = app =>
 
 const getUpdatedJSON = () => {
     const trip = originalRequest.trip
-    
     const updatedTrip = {
         ...trip,
         estimated_arrival_posix: Date.parse(trip.estimated_arrival)
