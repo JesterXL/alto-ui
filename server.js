@@ -38,7 +38,8 @@ const getUpdatedJSON = () => {
     const trip = originalRequest.trip
     const updatedTrip = {
         ...trip,
-        estimated_arrival_posix: Date.parse(trip.estimated_arrival)
+        estimated_arrival_posix: Date.parse(trip.estimated_arrival),
+        estimated_fare_min: `$${String((trip.estimated_fare_min / 100).toFixed(2))}`
     }
     return {
         ...originalRequest,

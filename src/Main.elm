@@ -217,7 +217,7 @@ view model =
                             , div [class "flex flex-row gap-8 pb-12"][
                                 div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
                                     p [class "text-alto-title text-alto-primary opacity-75"][text "Estimated Fare:"]
-                                    , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text "$65 - $75", span [][img [src "images/Info_icon.png", class "w-[13px] h-[13px]"][]]]
+                                    , p [class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60"][text (fareToString tripData.trip.fare), span [][img [src "images/Info_icon.png", class "w-[13px] h-[13px]"][]]]
                                 ]
                                 , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
                                     p [class "text-alto-title text-alto-primary opacity-75"][text "Passengers:"]
@@ -342,3 +342,7 @@ getDotClass screenA screenB =
         "dot"
     else
         "dotFade"
+
+fareToString : Fare -> String
+fareToString fare =
+    "$" ++ (String.fromInt fare.min) ++ " - $" ++ (String.fromInt fare.max)
