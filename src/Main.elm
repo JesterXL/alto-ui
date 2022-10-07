@@ -49,8 +49,8 @@ type alias Trip =
     , notes : String }
 
 type alias Fare =
-    { min : Int
-    , max : Int }
+    { min : String
+    , max : String }
 
 type alias Passengers =
     { min : Int 
@@ -140,8 +140,8 @@ posixDecoder millis =
 
 fareDecoder =
     JD.map2 Fare
-        (JD.field "estimated_fare_min" JD.int)
-        (JD.field "estimated_fare_max" JD.int)
+        (JD.field "estimated_fare_min" JD.string)
+        (JD.field "estimated_fare_max" JD.string)
 
 passsengersDecoder =
     JD.map2 Passengers
@@ -221,25 +221,18 @@ view model =
                                 ]
                                 , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
                                     p [class "text-alto-title text-alto-primary opacity-75"][text "Passengers:"]
-                                    , p [class "text-alto-base font-bold opacity-60"][text "1 - 5"]
+                                    , p [class "text-alto-base font-bold opacity-60"][text (passengersToString tripData.trip.passengers)]
                                 ]
                                 , div [class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line"][
                                     p[class "text-alto-title text-alto-primary opacity-75"][text "Payment:"]
-                                    , p [class "text-alto-base font-bold opacity-60"][text "Amex01"]
+                                    , p [class "text-alto-base font-bold opacity-60"][text tripData.trip.payment]
                                 ]
                             ]
-                            , div [class "pb-2 text-alto-base text-alto-primary opacity-75"][
-                                    p [][text "449 Flora St."]
-                                    , p [][text "Dallas, Texas 75201"]
-                                ]
+                            , viewPickupLocation tripData.trip.pickup
                             , div [class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line"][]
-                            , div [class "pb-4 text-alto-base text-alto-primary font-bold opacity-75"][
-                                p[][text "DFW International Airport"]
-                                , p[][text "American Airlines Terminal E"]
-                                , p[][text "Irving, Texas 75261"]
-                            ]
+                            , viewDropoffLocation tripData.trip.dropoff
                             , div [class "flex flex-row gap-4 items-center text-alto-base text-alto-primary opacity-75"][
-                                p[][text "Can you drop me off at AA International Bag Drop please?"]
+                                p[][text tripData.trip.notes]
                                 , img [src "images/Edit_icon.png", class "w-[10px] h-[10px]"][]
                             ]
                             , div [class "grow"][]
@@ -345,4 +338,54 @@ getDotClass screenA screenB =
 
 fareToString : Fare -> String
 fareToString fare =
-    "$" ++ (String.fromInt fare.min) ++ " - $" ++ (String.fromInt fare.max)
+    fare.min ++ " - " ++ fare.max
+
+passengersToString : Passengers -> String
+passengersToString passengers =
+    (String.fromInt passengers.min) ++ " - " ++ (String.fromInt passengers.max)
+
+-- TODO: handle street2
+viewPickupLocation : Location -> Html Msg
+viewPickupLocation location =
+    div
+        [class "pb-2 text-alto-base text-alto-primary opacity-75"]
+        (
+            case location.name of
+                Nothing ->
+                    [
+                        p [][text location.street1]
+                        , p [][text (locationToCityStateZip location)]
+                    ]
+                Just locationName ->
+                    [
+                        p [][text locationName]
+                        , p [][text location.street1]
+                        , p [][text (locationToCityStateZip location)]
+                    ]
+        )
+
+
+locationToCityStateZip : Location -> String
+locationToCityStateZip location =
+    location.city ++ ", " ++ location.state ++ " " ++ location.zipcode
+
+-- TODO: handle street2
+viewDropoffLocation : Location -> Html Msg
+viewDropoffLocation location =
+    div [class "pb-4 text-alto-base text-alto-primary font-bold opacity-75"]
+    (
+        case location.name of
+            Nothing ->
+                [
+                    p[][text location.street1]
+                    , p[][text (locationToCityStateZip location)]
+                ]
+            Just locationName ->
+                [
+                    p[][text locationName]
+                    , p[][text location.street1]
+                    , p[][text (locationToCityStateZip location)]
+                ]
+    )
+    
+    
