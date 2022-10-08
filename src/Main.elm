@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = VibeScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -329,8 +329,7 @@ view model =
 
                     VibeScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ -- TODO/FIXME: this works with the whole absolute + top-4 thing,
-                              -- but the rest of the flex content gets confused
+                            [
                               img [ class "vibeMask top-4 absolute", src "images/Map_overview.png" ] []
                             , img [ class "top-60 right-4 absolute", src "images/Map_icon.png" ] []
                             , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Trip" ]
@@ -339,14 +338,12 @@ view model =
                                 , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
                                 ]
                             , p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
-                            , div [ class "flex flex-col w-screen pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line" ]
+                            , div [ class "flex flex-col pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line" ]
                                 [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Current Vibe" ]
                                 , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vibe.name ]
                                 ]
                             , div [ class "grow" ] []
-                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen bg-alto-dark" ]
-                                [ span [ class "uppercase text-alto-base font-semibold text-white" ] [ text "Change Vehicle Vibe" ]
-                                ]
+                            , viewButton "Change Vehicle Vibe" True []
                             ]
         , div [ class "mt-6 pt-2 flex flex-row border-t-2 border-t-solid border-t-alto-line" ]
             [ div [ class "m-auto w-[24px] h-[24px]" ] [ img [ src "images/Profile_icon.png" ] [] ]
@@ -533,7 +530,8 @@ viewButton label enabled attributes =
 
 disabledButtonStyles : String
 disabledButtonStyles =
-    "mt-4 p-4 border-2 border-solid border-alto-line w-screen"
+    "mt-4 p-4 border-2 border-solid border-alto-line"
+    -- "border-2 border-solid border-alto-line w-screen"
 
 disabledButtonTextStyles : String
 disabledButtonTextStyles =
@@ -541,7 +539,7 @@ disabledButtonTextStyles =
 
 enabledButtonStyles : String
 enabledButtonStyles =
-    "mt-4 p-4 border-2 border-solid border-alto-line w-screen bg-alto-dark"
+    "mt-4 p-4 border-2 border-solid border-alto-line bg-alto-dark"
 
 enabledButtonTextStyles : String
 enabledButtonTextStyles =
