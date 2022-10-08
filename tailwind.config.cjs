@@ -22,6 +22,10 @@ module.exports = {
 				'alto-title': '0.75rem',
 				'alto-subtitle': '0.5rem'
 			}
+		},
+		screens: {
+			small: "310px",
+			large: "560px"
 		}
 	}
 }

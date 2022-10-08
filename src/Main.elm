@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
