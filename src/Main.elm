@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -300,12 +300,12 @@ view model =
 
                     DriverScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ img [ class "object-none object-[50%_39%]", src tripData.driver.image ] []
+                            [ img [ class "small:object-none small:object-[50%_39%] medium:object-center large:object-contain", src tripData.driver.image ] []
                             , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Driver" ]
                             , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.driver.name ]
                             , div []
                                 [ div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
-                                , p [ class "text-alto-title tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
+                                , p [ class "text-alto-title large:text-alto-base tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
                                 ]
                             , div [ class "grow" ] []
                             , case tripData.driver.phone of
@@ -370,7 +370,7 @@ view model =
 getBGColor : Screen -> String
 getBGColor screen =
     if screen == DriverScreen then
-        "bg-[#D9E0E6]"
+        "small:bg-[#D9E0E6] large:bg-alto-page-background"
 
     else
         " "
