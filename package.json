@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test/**/*.test.js",
     "start": "elm-live src/Main.elm --port=8001 --dir=./src --start-page=index.html --pushstate -- --debug --output=src/elm.js",
-    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o src/tailwind.build.css --watch"
+    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o src/tailwind.build.css --watch",
+    "review": "elm-review"
   },
   "keywords": [],
   "author": "",

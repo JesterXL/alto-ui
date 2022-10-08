@@ -1,3 +1,8 @@
+/*
+  Base styles for the Alto UI. Sets up fonts first,
+  then the Tailwind CSS styles, and finally
+  a couple page deafults + custom styles I need.
+*/
 @font-face {
   font-family: "Optima Black";
   src: url("fonts/Linotype - OptimaLTStd-Black.otf") format("opentype");

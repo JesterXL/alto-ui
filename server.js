@@ -1,9 +1,15 @@
+/*
+    Local server to show the UI working. Adds POSIX time and stringified dollars
+    to the JSON to ensure it's safer/better practice for the UI. See the
+    server.test.js unit test for details.
+*/
 const express = require('express')
 const cors = require('cors')
 
 const app = express()
 app.use(cors())
 const port = 3000
+// original JSON from the assets folder
 const originalRequest = require('./original.json')
 
 const setupRoutes = app => {
@@ -34,6 +40,8 @@ const stopServer = app =>
         }
     )
 
+// adds poxis time, and updates the estimated fares to safer strings
+// TODO/FIXME: ensure if any math fails, we fail the request here
 const getUpdatedJSON = () => {
     const trip = originalRequest.trip
     const updatedTrip = {
