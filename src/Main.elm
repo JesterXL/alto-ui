@@ -262,7 +262,7 @@ view model =
                                 , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
                                 ]
                             , p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
-                            , div [ class "flex flex-row gap-8 pb-12" ]
+                            , div [ class "flex small:flex-col medium:flex-row small:gap-2 medium:gap-4 pb-12" ]
                                 [ div [ class "flex flex-col basis-1/3 border-t-2 border-t-solid border-t-alto-line" ]
                                     [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Estimated Fare:" ]
                                     , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text (fareToString tripData.trip.fare), span [] [ img [ src "images/Info_icon.png", class "w-[13px] h-[13px]" ] [] ] ]
@@ -276,12 +276,20 @@ view model =
                                     , p [ class "text-alto-base font-bold opacity-60" ] [ text tripData.trip.payment ]
                                     ]
                                 ]
-                            , viewPickupLocation tripData.trip.pickup
-                            , div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
-                            , viewDropoffLocation tripData.trip.dropoff
-                            , div [ class "flex flex-row gap-4 items-center text-alto-base text-alto-primary opacity-75" ]
-                                [ p [] [ text tripData.trip.notes ]
-                                , img [ src "images/Edit_icon.png", class "w-[10px] h-[10px]" ] []
+                            , div [ class "flex small:flex-col large:flex-row small:gap-2 medium:gap-4" ] [
+                                div [class "large:grow basis-1/3"][
+                                    p [ class "small:hidden large:block text-alto-title text-alto-primary opacity-75" ] [ text "Pickup Location:" ]
+                                    , viewPickupLocation tripData.trip.pickup
+                                ]
+                                , div [ class "large:hidden small:pt-2 small:pb-2 medium:pt-0 medium:pb-0 border-t-2 border-t-solid border-t-alto-line" ] []
+                                , div [ class "large:grow basis-1/3" ][
+                                    p [ class "small:hidden large:block text-alto-title text-alto-primary opacity-75" ] [ text "Dropoff Location:" ]
+                                    , viewDropoffLocation tripData.trip.dropoff
+                                ]
+                                , div [ class "flex flex-row gap-4 items-center large:items-start text-alto-base text-alto-primary opacity-75 basis-1/3" ]
+                                    [ p [] [ text tripData.trip.notes ]
+                                    , img [ src "images/Edit_icon.png", class "w-[10px] h-[10px]" ] []
+                                    ]
                                 ]
                             , div [ class "grow" ] []
                             , button [ class "p-4 border-2 border-solid border-alto-line" ]
