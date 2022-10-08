@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, button, div, h1, h2, img, p, span, text, ul, li, a)
-import Html.Attributes exposing (class, src, disabled, href)
+import Html.Attributes exposing (class, src, disabled, href, attribute)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as JD
@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = VibeScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -225,7 +225,7 @@ view model =
     div [ class "w-screen flex flex-col pl-4 pr-4 justify-between" ]
         [ -- TODO/FIXME: This padding causes side-scrolling
           div [ class ("flex flex-col " ++ getBGColor model.screen) ]
-            [ div [ class "m-auto pt-4 pb-4" ] [ img [ src "images/Alto_logo.png", class "w-[50px] h-[14px]" ] [] ]
+            [ div [ class "m-auto pt-4 pb-4" ] [ img [ src "images/Alto_logo.png", class "w-[50px] h-[14px]", attribute "data-logo" "Alto"] [] ]
             , dots model.screen
             , tabs model.screen
             ]
@@ -257,7 +257,7 @@ view model =
 
                     TripScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ h1 [ class "font-optima text-4xl pt-10 pb-10" ] [ text "Your Trip" ]
+                            [ h1 [ class "font-optima text-4xl pt-10 pb-10", attribute "data-title" "Your Trip" ] [ text "Your Trip" ]
                             , h2 [ class "font-pxgrotesk text-7xl" ]
                                 [ text (utcTimeToHoursMinutes tripData.trip.arrival)
                                 , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
@@ -301,7 +301,7 @@ view model =
                     DriverScreen ->
                         div [ class "flex grow flex-col" ]
                             [ img [ class "small:object-none small:object-[50%_39%] medium:object-center large:object-contain", src tripData.driver.image ] []
-                            , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Driver" ]
+                            , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Your Driver" ] [ text "Your Driver" ]
                             , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.driver.name ]
                             , div []
                                 [ div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
@@ -318,7 +318,7 @@ view model =
                     VehicleScreen ->
                         div [ class "flex grow flex-col" ]
                             [ img [ class "small:object-none small:object-[50%_39%] medium:object-contain", src tripData.vehicle.image ] []
-                            , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Vehicle" ]
+                            , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Your Vehicle" ] [ text "Your Vehicle" ]
                             , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.vehicle.license ]
                             , div [ class "flex small:flex-col medium:flex-row w-screen gap-8 pb-12 pt-8" ]
                                 [ div [ class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line" ]
@@ -341,7 +341,7 @@ view model =
                             [
                               img [ class "vibeMask top-4 medium:top-[99px] absolute medium:flex", src "images/Map_overview.png" ] []
                             , img [ class "top-60 right-4 absolute", src "images/Map_icon.png" ] []
-                            , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Trip" ]
+                            , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Vibe" ] [ text "Your Trip" ]
                             , h2 [ class "font-pxgrotesklight text-7xl" ]
                                 [ text (utcTimeToHoursMinutes tripData.trip.arrival)
                                 , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
@@ -382,11 +382,11 @@ getBGColor screen =
 dots : Screen -> Html Msg
 dots screen =
     div [ class "absolute small:top-12 small:right-8 flex small:flex-col medium:flex-row large:hidden gap-1" ]
-        [ div [ class (getDotClass screen TripScreen), onClick (ShowScreen TripScreen) ] []
-        , div [ class (getDotClass screen DriverScreen), onClick (ShowScreen DriverScreen) ] []
-        , div [ class (getDotClass screen VehicleScreen), onClick (ShowScreen VehicleScreen) ] []
-        , div [ class (getDotClass screen VibeScreen), onClick (ShowScreen VibeScreen) ] []
-        , div [ class (getDotClass screen ErrorScreen), onClick (ShowScreen ErrorScreen) ] []
+        [ div [ class (getDotClass screen TripScreen), onClick (ShowScreen TripScreen), attribute "data-dot" "My Trip" ] []
+        , div [ class (getDotClass screen DriverScreen), onClick (ShowScreen DriverScreen), attribute "data-dot" "My Driver" ] []
+        , div [ class (getDotClass screen VehicleScreen), onClick (ShowScreen VehicleScreen), attribute "data-dot" "Vehicle" ] []
+        , div [ class (getDotClass screen VibeScreen), onClick (ShowScreen VibeScreen), attribute "data-dot" "Dat Vibe Tho" ] []
+        , div [ class (getDotClass screen ErrorScreen), onClick (ShowScreen ErrorScreen), attribute "data-dot" "Error" ] []
         ]
 
 tabs : Screen -> Html Msg
@@ -401,9 +401,9 @@ tabs screen =
 tab : String -> Bool -> Msg -> Html Msg
 tab label active onClickMsg =
     if active == True then
-        li [class "mr-2"][a [href "#", class "inline-block p-4 text-white bg-alto-dark rounded-t-lg active", onClick onClickMsg][text label]]
+        li [class "mr-2"][a [href "#", class "inline-block p-4 text-white bg-alto-dark rounded-t-lg active", onClick onClickMsg, attribute "data-tab" label][text label]]
     else
-        li [class "mr-2"][a [href "#", class "inline-block p-4 rounded-t-lg hover:text-alto-primary-gray hover:bg-alto-gray", onClick onClickMsg][text label]]
+        li [class "mr-2"][a [href "#", class "inline-block p-4 rounded-t-lg hover:text-alto-primary-gray hover:bg-alto-gray", onClick onClickMsg, attribute "data-tab" label][text label]]
 
 screenIsActive : Screen -> Screen -> Bool
 screenIsActive screenA screenB =
