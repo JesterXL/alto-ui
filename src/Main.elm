@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = VibeScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -308,17 +308,17 @@ view model =
 
                     VehicleScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ img [ class "object-none object-[50%_39%]", src "images/Vehicle_photo.png" ] []
+                            [ img [ class "object-none object-[50%_39%]", src tripData.vehicle.image ] []
                             , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Vehicle" ]
-                            , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text "Alto 09" ]
+                            , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.vehicle.license ]
                             , div [ class "flex flex-row w-screen gap-8 pb-12 pt-8" ]
                                 [ div [ class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line" ]
                                     [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Make / Model" ]
-                                    , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text "2019 Volkswagen Atlas" ]
+                                    , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vehicle.make ]
                                     ]
                                 , div [ class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line" ]
                                     [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Color" ]
-                                    , p [ class "text-alto-base font-bold opacity-60" ] [ text "Pure White" ]
+                                    , p [ class "text-alto-base font-bold opacity-60" ] [ text tripData.vehicle.color ]
                                     ]
                                 ]
                             , div [ class "grow" ] []
@@ -335,13 +335,13 @@ view model =
                             , img [ class "top-60 right-4 absolute", src "images/Map_icon.png" ] []
                             , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Trip" ]
                             , h2 [ class "font-pxgrotesklight text-7xl" ]
-                                [ text "5:39 "
-                                , span [ class "text-3xl uppercase" ] [ text "pm" ]
+                                [ text (utcTimeToHoursMinutes tripData.trip.arrival)
+                                , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
                                 ]
-                            , p [ class "pb-8 text-alto-base text-alto-primary" ] [ text "Estimated arrival at DFW Int'l Airport - Terminal E" ]
+                            , p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
                             , div [ class "flex flex-col w-screen pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line" ]
                                 [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Current Vibe" ]
-                                , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text "Vaporwave Beats" ]
+                                , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vibe.name ]
                                 ]
                             , div [ class "grow" ] []
                             , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen bg-alto-dark" ]
