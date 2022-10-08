@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, h1, h2, img, p, span, text)
-import Html.Attributes exposing (class, src, disabled)
+import Html exposing (Html, button, div, h1, h2, img, p, span, text, ul, li, a)
+import Html.Attributes exposing (class, src, disabled, href)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as JD
@@ -225,8 +225,9 @@ view model =
     div [ class "w-screen flex flex-col pl-4 pr-4 justify-between" ]
         [ -- TODO/FIXME: This padding causes side-scrolling
           div [ class ("flex flex-col " ++ getBGColor model.screen) ]
-            [ div [ class "m-auto pt-4 pb-4 z-10" ] [ img [ src "images/Alto_logo.png", class "w-[50px] h-[14px]" ] [] ]
+            [ div [ class "m-auto pt-4 pb-4" ] [ img [ src "images/Alto_logo.png", class "w-[50px] h-[14px]" ] [] ]
             , dots model.screen
+            , tabs model.screen
             ]
         , case model.tripData of
             Nothing ->
@@ -338,7 +339,7 @@ view model =
                     VibeScreen ->
                         div [ class "flex grow flex-col" ]
                             [
-                              img [ class "vibeMask top-4 absolute", src "images/Map_overview.png" ] []
+                              img [ class "vibeMask top-4 medium:top-[99px] absolute medium:flex", src "images/Map_overview.png" ] []
                             , img [ class "top-60 right-4 absolute", src "images/Map_icon.png" ] []
                             , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Trip" ]
                             , h2 [ class "font-pxgrotesklight text-7xl" ]
@@ -377,13 +378,33 @@ getBGColor screen =
 
 dots : Screen -> Html Msg
 dots screen =
-    div [ class "absolute top-12 right-8 flex flex-col gap-1" ]
+    div [ class "absolute small:top-12 small:right-8 flex small:flex-col medium:flex-row large:hidden gap-1" ]
         [ div [ class (getDotClass screen TripScreen), onClick (ShowScreen TripScreen) ] []
         , div [ class (getDotClass screen DriverScreen), onClick (ShowScreen DriverScreen) ] []
         , div [ class (getDotClass screen VehicleScreen), onClick (ShowScreen VehicleScreen) ] []
         , div [ class (getDotClass screen VibeScreen), onClick (ShowScreen VibeScreen) ] []
         , div [ class (getDotClass screen ErrorScreen), onClick (ShowScreen ErrorScreen) ] []
         ]
+
+tabs : Screen -> Html Msg
+tabs screen =
+    ul [class "small:hidden large:flex flex flex-wrap text-sm font-medium text-center text-alto-secondary border-b border-alto-line"][
+        tab "My Trip" (screenIsActive TripScreen screen) (ShowScreen TripScreen)
+        , tab "My Driver" (screenIsActive DriverScreen screen) (ShowScreen DriverScreen)
+        , tab "Vehicle" (screenIsActive VehicleScreen screen) (ShowScreen VehicleScreen)
+        , tab "Dat Vibe Tho" (screenIsActive VibeScreen screen) (ShowScreen VibeScreen)
+    ]
+
+tab : String -> Bool -> Msg -> Html Msg
+tab label active onClickMsg =
+    if active == True then
+        li [class "mr-2"][a [href "#", class "inline-block p-4 text-white bg-alto-dark rounded-t-lg active", onClick onClickMsg][text label]]
+    else
+        li [class "mr-2"][a [href "#", class "inline-block p-4 rounded-t-lg hover:text-alto-primary-gray hover:bg-alto-gray", onClick onClickMsg][text label]]
+
+screenIsActive : Screen -> Screen -> Bool
+screenIsActive screenA screenB =
+    screenA == screenB
 
 
 getDotClass : Screen -> Screen -> String

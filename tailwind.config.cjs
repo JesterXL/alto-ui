@@ -15,7 +15,9 @@ module.exports = {
 				'alto-secondary': '#6C685B',
 				'alto-dark': '#AC826D',
 				'alto-page-background': '#F7F3EF',
-				'alto-line': '#EAE6DB'
+				'alto-line': '#EAE6DB',
+				'alto-gray': '#D9D8CB',
+				'alto-primary-gray': '#777776'
 			},
 			fontSize: {
 				'alto-base': '0.875rem',
