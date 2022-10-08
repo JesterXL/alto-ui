@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = VehicleScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -317,10 +317,10 @@ view model =
 
                     VehicleScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ img [ class "object-none object-[50%_39%]", src tripData.vehicle.image ] []
+                            [ img [ class "small:object-none small:object-[50%_39%] medium:object-contain", src tripData.vehicle.image ] []
                             , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8" ] [ text "Your Vehicle" ]
                             , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.vehicle.license ]
-                            , div [ class "flex flex-row w-screen gap-8 pb-12 pt-8" ]
+                            , div [ class "flex small:flex-col medium:flex-row w-screen gap-8 pb-12 pt-8" ]
                                 [ div [ class "flex flex-col basis-1/2 border-t-2 border-t-solid border-t-alto-line" ]
                                     [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Make / Model" ]
                                     , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vehicle.make ]
