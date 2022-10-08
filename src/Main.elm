@@ -128,7 +128,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = VehicleScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = VibeScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -346,11 +346,14 @@ view model =
                                 [ text (utcTimeToHoursMinutes tripData.trip.arrival)
                                 , span [ class "text-3xl uppercase" ] [ text (getAMorPM (toHour utc tripData.trip.arrival)) ]
                                 ]
-                            , p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
-                            , div [ class "flex flex-col pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line" ]
-                                [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Current Vibe" ]
-                                , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vibe.name ]
-                                ]
+                            , div [class "flex small:flex-col medium:flex-row medium:gap-8"][
+                                
+                                p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
+                                , div [ class "flex flex-col pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line medium:pt-0 medium:pb-0 medium:border-t-0" ]
+                                    [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Current Vibe" ]
+                                    , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vibe.name ]
+                                    ]
+                            ]
                             , div [ class "grow" ] []
                             , viewButton "Change Vehicle Vibe" True []
                             ]
