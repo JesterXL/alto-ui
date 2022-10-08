@@ -144,6 +144,7 @@ init _ =
     )
 
 
+tripDataDecoder : JD.Decoder TripData
 tripDataDecoder =
     JD.map4 TripData
         (JD.field "trip" tripDecoder)
@@ -152,6 +153,7 @@ tripDataDecoder =
         (JD.field "vibe" vibeDecoder)
 
 
+tripDecoder : JD.Decoder Trip
 tripDecoder =
     JD.map8 Trip
         (JD.field "estimated_arrival_posix" JD.int |> JD.andThen posixDecoder)
@@ -164,22 +166,26 @@ tripDecoder =
         (JD.field "notes" JD.string)
 
 
+posixDecoder : Int -> JD.Decoder Posix
 posixDecoder millis =
     JD.succeed (millisToPosix millis)
 
 
+fareDecoder : JD.Decoder Fare
 fareDecoder =
     JD.map2 Fare
         (JD.field "estimated_fare_min" JD.string)
         (JD.field "estimated_fare_max" JD.string)
 
 
+passsengersDecoder : JD.Decoder Passengers
 passsengersDecoder =
     JD.map2 Passengers
         (JD.field "passengers_min" JD.int)
         (JD.field "passengers_max" JD.int)
 
 
+locationDecoder : JD.Decoder Location
 locationDecoder =
     JD.map8 Location
         (JD.maybe (JD.field "name" JD.string))
@@ -192,6 +198,7 @@ locationDecoder =
         (JD.maybe (JD.field "long" JD.string))
 
 
+driverDecoder : JD.Decoder Driver
 driverDecoder =
     JD.map4 Driver
         (JD.field "name" JD.string)
@@ -199,6 +206,7 @@ driverDecoder =
         (JD.field "bio" JD.string)
         (JD.maybe (JD.field "phone" JD.string) |> JD.andThen validatePhone)
 
+validatePhone : Maybe String -> JD.Decoder (Maybe String)
 validatePhone phoneMaybe =
     case phoneMaybe of
         Nothing -> JD.succeed Nothing
@@ -207,6 +215,7 @@ validatePhone phoneMaybe =
                 "" -> JD.succeed Nothing
                 _ -> JD.succeed (Just phone)
 
+vehicleDecoder : JD.Decoder Vehicle
 vehicleDecoder =
     JD.map4 Vehicle
         (JD.field "license" JD.string)
@@ -215,6 +224,7 @@ vehicleDecoder =
         (JD.field "image" JD.string)
 
 
+vibeDecoder : JD.Decoder Vibe
 vibeDecoder =
     JD.map Vibe
         (JD.field "name" JD.string)
@@ -492,7 +502,7 @@ getDestinationName tripDataMaybe =
                     droppoffName
 
 
-toUtcString : Time.Posix -> String
+toUtcString : Posix -> String
 toUtcString time =
     String.fromInt (toHour utc time)
         ++ ":"
@@ -530,7 +540,7 @@ getAMorPM hour =
         "??"
 
 
-utcTimeToHoursMinutes : Time.Posix -> String
+utcTimeToHoursMinutes : Posix -> String
 utcTimeToHoursMinutes time =
     String.fromInt ( (toHour utc time) |> militaryHourToRegularHour)
         ++ ":"
@@ -547,14 +557,14 @@ viewButton : String -> Bool -> List (Html.Attribute Msg) -> Html Msg
 viewButton label enabled attributes =
     if enabled == True then
         button 
-            ([ class enabledButtonStyles ] ++ attributes)
+            (class enabledButtonStyles :: attributes)
             [ span 
                 [ class enabledButtonTextStyles ] 
                 [ text label ]
             ]
     else
         button 
-            ([ class disabledButtonStyles, disabled False ] ++ attributes)
+            ( class disabledButtonStyles :: disabled False :: attributes)
             [ span 
                 [ class disabledButtonTextStyles ] 
                 [ text label ]
