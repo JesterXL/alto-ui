@@ -2,6 +2,8 @@
 
 Alto UI is a web UI and light server API built for the Alto UI Test. The Alto UI shows the user's current Trip, Driver, Vehicle, and Vibe through a web UI that has 3 breakpoints for mobile, tablet, larger.
 
+<a href="https://www.youtube.com/watch?v=CdPKpgoF5RY"><img src="docs/vid.png"/></a>
+
 # Contents
 
 - [How to Run The Code](#How-to-Run-The-Code)
