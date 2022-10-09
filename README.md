@@ -4,12 +4,12 @@ Alto UI is a web UI and light server API built for the Alto UI Test. The Alto UI
 
 # Contents
 
-- (How to Run The Code)[#How-to-Run-The-Code]
-- (How to Update Code)[#How-to-Update-Code]
-- (Common Problems Running Code)[#Common-Problems-Running-Code]
-- (How to Run the Tests)[#How-to-Run-the-Tests]
-- (How to Run Linting Rules)[#How-to-Run-Linting-Rules]
-- (Architecture)[#Architecture]
+- [How to Run The Code](#How-to-Run-The-Code)
+- [How to Update Code](#How-to-Update-Code)
+- [Common Problems Running Code](#Common-Problems-Running-Code)
+- [How to Run the Tests](#How-to-Run-the-Tests)
+- [How to Run Linting Rules](#How-to-Run-Linting-Rules)
+- [Architecture](#Architecture)
 
 # How to Run The Code
 
