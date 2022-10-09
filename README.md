@@ -2,13 +2,14 @@
 
 Alto UI is a web UI and light server API built for the Alto UI Test. The Alto UI shows the user's current Trip, Driver, Vehicle, and Vibe through a web UI that has 3 breakpoints for mobile, tablet, larger.
 
-## UI
+# Contents
 
-The UI is a web UI built in [Elm](https://elm-lang.org/) and [TailwindCSS](https://tailwindcss.com/). It includes [Cypress](https://www.cypress.io/) end to end tests to ensure the UI works at various breakpoints (currently they're only whitebox tests as I mock the server). The local dev server uses [elm-live](https://github.com/wking-io/elm-live). For linting, we run [elm-review](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/).
-
-## API
-
-There is a light [Express.js](https://expressjs.com/) API used to server the JSON data for the UI as well as fix some of the data such as changing dates to POSIX and changing the currency to USD and safe formatted strings.
+- (How to Run The Code)(#How-to-Run-The-Code)
+- (How to Update Code)(#How-to-Update-Code)
+- (Common Problems Running Code)(#Common-Problems-Running-Code)
+- (How to Run the Tests)(#How-to-Run-the-Tests)
+- (How to Run Linting Rules)(#How-to-Run-Linting-Rules)
+- (Architecture)(#Architecture)
 
 # How to Run The Code
 
@@ -111,7 +112,7 @@ There are 2 pieces; Elm for functionality, and TailwindCSS for styling. We use t
 
 ## Why Elm and What are the Pieces?
 
-The UI is built in Elm, an [ML based language](https://en.wikipedia.org/wiki/ML_(programming_language) that compiles to JavaScript. We use Elm because:
+The UI is built in [Elm](https://elm-lang.org/), an [ML based language](https://en.wikipedia.org/wiki/ML_(programming_language) that compiles to JavaScript. We use Elm because:
 
 1. **no runtime exceptions**; no surprise errors in your code at runtime. You + visual designer can confidently handle all error scenarios, and you never have to "go add a try/catch" later or "handle an undefined possibility" later in your code.
 2. **no side effects**; all Elm code is pure, and there are no side effects. That means all unit tests require no test doubles (stubs, mocks, spies, etc). This means the unit tests you _do_ write are focused on domain logic or correctness of how your UI works. For algorithms, despite Elm's amazing type system, you'll still want to do fuzz/[property tests](https://en.wikipedia.org/wiki/Property_testing) and Cypress end to end/functional tests.
@@ -140,7 +141,7 @@ While I practice [trunk based development](https://trunkbaseddevelopment.com/), 
 
 ## Why TailwindCSS and What are the Pieces?
 
-We use TailwindCSS to make using CSS easier. A lot of CSS workflows have a separate file structure (like SASS or LESS), a compiler, and those files somehow magically get wired up to your bundling system. These styles are then referenced as global variables in your JavaScript.
+We use [TailwindCSS](https://tailwindcss.com/) to make using CSS easier. A lot of CSS workflows have a separate file structure (like SASS or LESS), a compiler, and those files somehow magically get wired up to your bundling system. These styles are then referenced as global variables in your JavaScript.
 
 TailwindCSS is similiar, except, they just provide a bunch of base styles for "all things in CSS" + whatever you add. You can then use them directly on your HTML nodes. This removes the need for writing lots of CSS files. Instead, the tradeoff is more verbose HTML nodes. Some of us like this trade off because:
 1. we spend 90% of our writing code time _in_ the HTML.
