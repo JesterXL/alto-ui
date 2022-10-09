@@ -100,3 +100,103 @@ But if you use the old school adding 2 lists together:
 ... and run `npm run review`, the Elm Review rules won't like that. I don't have --force/fix on, so you'll have to manually fix, or revert.
 
 I don't have ESLint/TSLint as there isn't enough JavaScript in the `server.js` to justify it for this excercise.
+
+# Architecture
+
+The following outlines some of the decisions in technology choices to provide context for this excercise code.
+
+## UI in Elm & TailwindCSS
+
+There are 2 pieces; Elm for functionality, and TailwindCSS for styling. We use the Tailwind styles in our Elm code for "CSS in JS" style workflow.
+
+## Why Elm and What are the Pieces?
+
+The UI is built in Elm, an [ML based language](https://en.wikipedia.org/wiki/ML_(programming_language) that compiles to JavaScript. We use Elm because:
+
+1. **no runtime exceptions**; no surprise errors in your code at runtime. You + visual designer can confidently handle all error scenarios, and you never have to "go add a try/catch" later or "handle an undefined possibility" later in your code.
+2. **no side effects**; all Elm code is pure, and there are no side effects. That means all unit tests require no test doubles (stubs, mocks, spies, etc). This means the unit tests you _do_ write are focused on domain logic or correctness of how your UI works. For algorithms, despite Elm's amazing type system, you'll still want to do fuzz/[property tests](https://en.wikipedia.org/wiki/Property_testing) and Cypress end to end/functional tests.
+3. **fearless refactoring**; you'll never be afraid to touch the code out of worry you'll break something unrelated. The type system & compiler will tell you what you need to fix when you change or add a feature.
+4. **time travel debugging**; all data changes are based on an [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) (like git history). So you can rewind and fast forward the events in the browser to "see" how your app changes over time.
+![Time Travel Debugging](docs/time-travel.png)
+5. **make impossible situations impossible**; using the type system, you can model your types, and thus your UI, to ensure impossible situations don't happen with your data or UI interactions. See [my article](https://jessewarden.com/2019/02/easier-asynchronous-state-modelling-in-react-redux-or-hooks.html) showing a UI example in Redux and Richard Feldman's ["Making Impossible States Impossible"](https://www.youtube.com/watch?v=IcgmSRJHu_8).
+
+Elm compiles to `elm.js` by default; if you use the `--optmize` flag, it'll generate more performant and smaller JavaScript. You should still [optimize more](https://guide.elm-lang.org/optimization/asset_size.html) by running the code through UglifyJS a couple times.
+
+The `index.html` manually embeds this in a script tag. However, you still need to bootstrap the application yourself, and possibly wire up other JavaScript things (such as web analytics), so the `elmApp.js` does this. This file is very similiar to your `index.js` in a React or Angular project. Most elm apps expect you to provide an HTML node to latch onto much like React. However, there are cases in an Elm application where it handles everything and you don't need an `elmApp.js`.
+
+The `elm.json` operates much like the JavaScript `package.json`. The difference is, you don't need to run `npm i` on it; Elm will automatically fetch, cache, and use pacakges when you compile; elm-live abstracts all of this away from you via `npm start`. If you are in a network that rewrites SSL certs, the Haskell package manager won't work, I wrote a [JavaScript elm npm installer](https://github.com/JesterXL/elm-library-installer) that can work around it.
+
+## Why Elm Review?
+
+While Elm's compiler is amazing, you can still write code that isn't great and there are tools that can help you make it great. Linting rules existing in all programming languages, but in Elm, it's a bit easier as compared to something like ESLint; [87% aren't even needed in Elm](https://elmcraft.org/compare/javascript/eslint/) because the language prevents problems, but that's still a lot of room to write bad code. Some of the rules also help runtime performance and bundling size as well.
+
+If you check out the `review/src/ReviewConfig.elm`, you can see all the configured rules. Most of the ones commented out I don't agree with, but could be convinced otherwise.
+
+## Why Elm Format?
+
+While I practice [trunk based development](https://trunkbaseddevelopment.com/), code review has a lot of steps regardless if you're doing Feature Branches or something else. A lot it can be automated and completely remove hours/days of discussions around things that can be automated away. Examples include code formatting. In Go, ReScript, and other languages, it's built into the language. Some like .NET/C# have a popular Resharper plugin. Elm is the same using (elm-format)[https://github.com/avh4/elm-format]. The more we can automate at the top of the pyramid, the more time we have to focus on the harder, more impactful stuff below:
+
+![Code Review Pyramid](docs/code-review-pyramid.jpg)
+
+## Why TailwindCSS and What are the Pieces?
+
+We use TailwindCSS to make using CSS easier. A lot of CSS workflows have a separate file structure (like SASS or LESS), a compiler, and those files somehow magically get wired up to your bundling system. These styles are then referenced as global variables in your JavaScript.
+
+TailwindCSS is similiar, except, they just provide a bunch of base styles for "all things in CSS" + whatever you add. You can then use them directly on your HTML nodes. This removes the need for writing lots of CSS files. Instead, the tradeoff is more verbose HTML nodes. Some of us like this trade off because:
+1. we spend 90% of our writing code time _in_ the HTML.
+2. we spend 90% of our reading code time _in_ the HTML.
+
+We want to see "what styles is this component using _here_". When the HTML, CSS, and logic are all in the same place, it's easier for coders who build in a component style of UI development.
+
+The `tailwind.css` is where you put all your base styles, fonts, etc. The TailwindCSS compiler will look at your source code, see what styles you're using, and only compile those styles that you need into a `tailwind.build.css`. This `tailwind.build.css` is what you manually embed into `index.html`.
+
+The `tailwind.config.cjs` is what configures TailwindCSS. For us, that means:
+1. what files should trigger a rebuild of CSS
+2. what custom fonts, styles, and breakpoints have we created
+
+This allows us to instead of using the default Tailwind blue for backgrounds `bg-blue-600`, we can instead use our custom Alto design system colors, like `bg-alto-primary` and even use that same color pallete or "token color" on other things, like text `text-alto-primary`.
+
+Because Node.js is using it, it has to be `.cjs`. This is in contrast to the `elmApp.js` which is running the browser, so doesn't need `.mjs` file extension, and is using native ES6. Same goes for the unit tests; we default to CommonJS until the module situation improves in the Node.js ecosystem.
+
+All of the above allows you to write `p-8` or "padding: 8rem" in your Elm, HTML, or CSS. Tailwind will see the `p-8` and go "Ah, the developer is using that style, let me compile TailwindCSS styles + that padding class into the `tailwind.build.css` so the developer's HTML can use it". This includes your custom styles as well.
+
+We have 3 breakpoints, small, medium, and large. You'll see them used in the Main.elm code via `medium:p-8` which means "only add a padding of 8rem at a medium or larger breakpoint". These breakpoint prefixes are used all over to support a responsive design.
+
+## Why & What of Express.js?
+
+Nowadays, a UI developer will create their own [Back-End for Front-End](https://samnewman.io/patterns/architectural/bff/), or BFF. For this exercise from Alto, you only need a way to "load data into your UI"; a server isn't required, but to run web UI's, you already have a local server anyway, and Node.js makes it easy to run various server code. So Express.js makes it relatively straightforward to serve your JSON on a specific port separate from your UI.
+
+However, it also enables BFF capabilities. For example, Elm's whole philosophy is around "correctness". The ISO 6801 dates in JavaScript don't always parse correctly and make it hard to know "is this time for you right now, earlier, or later?" ([read the first 3 paragraphs](https://package.elm-lang.org/packages/elm/time/latest/) on elm/time to get more context). That doesn't follow the "correctness" philosophy wheereas Unix' POSIX time does. No matter where you are in the world, POSIX is always correct. If you need to know what the POSIX is _for you_, you just need a time zone. Those are also handled, dynamically, by a database external to browsers and OS's. Providing a good user experience around time is tough, but thankfully POSIX gives us that.
+
+The Alto example JSON does not; it's in a JavaScript date. You _can_ [use ISO 8601 parsing](https://package.elm-lang.org/packages/rtfeldman/elm-iso8601-date-strings/latest/) if you wish, but I want to follow best practices here. On the other hand, I recognize that the back-end may be unchangeable, or there may be legacy reasons it was that way, and it's super hard to change safely. No worries, we'll let the BFF fix it for the UI by converting it to a POSIX time.
+
+The second is the Alto JSON has money in it. This is dangerous to send a UI. Yes, Elm, like JavaScript, has a bunch of wonderful monetary libraries, it's the JSON transfer that's problem #1, and the ambiguity of what the money type is. For example, Int's and Numbers aren't big enough for most money math, you're supposed to use some kind of BigDecimal type. However, JSON doesn't support those sizes so it can get misconfigured. Worse, UI Developers can handle parsing and showing money differnly, leading to strange situations where 2 UI's hitting the same data source show different monetary amounts. Worse, when you start handling currency conversions, such as USD to Euro, things get even more complicated and hard to debug. It's better to have a single source of truth for all that parsing and tell the UI to "just show this". Strings do this nicely. This is what our BFF can also fix for our UI.
+
+The UI will hit the `server.js` Express.js server, and get the POSIX time added to the JSON, as well as the 2 monetary amounts converted to safe strings. By "safe" I mean "2 unit tests against static JSON". I'd prefer to use a safer language to do this in prod compared to this exercise where I got it working well enough.
+
+## Why Mocha?
+
+For most code, I practice Test Driven Development, or TDD. This means I write the test first, before the code. This style follows a Red Green Refactor approach of ensuring the test fails at first, writing the bare minimum amount of code to make it pass, and then continuing to improve the code by Refactoring and keeping the test(s) green.
+
+Pre-Mocha 8 was one of the fatest test suites. In addition, you can write `console.log` and see your logs whether the test passes or fails. Jest doesn't allow this, and is slow. As of Mocha 8 and higher, it's sadly just as slow as Jest, but at least I can see my logs when I'm some debugging some gnarly JavaScript. Mocha like Jest has the possibility for running tests in parallel.
+
+I'm open to other test suite libraries, it's just Mocha is the most battle tested, easiest to debug, and works for Cyrpess as well.
+
+While Jest has much better built-in support for test doubles, and Mocha requires something like Sinon, I don't think they should be used. I'm a functional programmer, and prefer determinisitic stubs using dependency injection. Mocks imply your code has side-effects, and can quickly overwhelm a code base, making the tests brittle, hard to maintain, and usually indicating side effects are too deep in your code. None of these problems exist in Elm, thankfully.
+
+## Why Cypress?
+
+Unless you have a lot of domain logic, most of your UI tests are functional tests. Elm's compiler is so good, while you could do TDD, it's unclear what you'd actually be testing beyond text formatters using fuzz tests. It's better to do that style of testing in functional tests since that's where the 3 main problems Elm doesn't solve:
+1. race conditions
+2. correctness
+3. style drama
+
+Even though you can model async tasks in Elm using [Task](https://package.elm-lang.org/packages/elm/core/latest/Task), you'll still sometimes get race conditions. Cypress can help you quickly find these weird edge cases.
+
+Correctness just means "the app works like we expect it too", and Cypress is one of the fastest test runners that allows you to debug in the browser while the test is running.
+
+Lastly, styles can break your app and have no code equivalent, so Cypress helps have a layer of red green refactor where Elm compiler can't help you.
+
+Puppeteer and Selenium usually require slow and bloated Docker containers that are required to be updated, require frequent Cyber security updates, and are misery for developers to debug. Cypress is also being incorporated into many services such as AWS Amplify, making it easier from an Ops perspective.
+
+Most imporantly, it's the fastest tool out of the bunch.
