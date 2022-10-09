@@ -121,6 +121,8 @@ The UI is built in [Elm](https://elm-lang.org/), an [ML based language](https://
 ![Time Travel Debugging](docs/time-travel.png)
 5. **make impossible situations impossible**; using the type system, you can model your types, and thus your UI, to ensure impossible situations don't happen with your data or UI interactions. See [my article](https://jessewarden.com/2019/02/easier-asynchronous-state-modelling-in-react-redux-or-hooks.html) showing a UI example in Redux and Richard Feldman's ["Making Impossible States Impossible"](https://www.youtube.com/watch?v=IcgmSRJHu_8).
 
+For a general overview of how [Elm makes you happy](https://www.youtube.com/watch?v=VJCP4_zgbPQ), I made a presentation going over all of it.
+
 Elm compiles to `elm.js` by default; if you use the `--optmize` flag, it'll generate more performant and smaller JavaScript. You should still [optimize more](https://guide.elm-lang.org/optimization/asset_size.html) by running the code through UglifyJS a couple times.
 
 The `index.html` manually embeds this in a script tag. However, you still need to bootstrap the application yourself, and possibly wire up other JavaScript things (such as web analytics), so the `elmApp.js` does this. This file is very similiar to your `index.js` in a React or Angular project. Most elm apps expect you to provide an HTML node to latch onto much like React. However, there are cases in an Elm application where it handles everything and you don't need an `elmApp.js`.
