@@ -175,7 +175,7 @@ update msg model =
                     ( { model | tripData = Nothing, screen = ErrorScreen }, Cmd.none )
 
                 Ok tripData ->
-                    ( { model | tripData = Just tripData, screen = TripScreen }, Cmd.none )
+                    ( { model | tripData = Just tripData, screen = DriverScreen }, Cmd.none )
 
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
@@ -446,21 +446,24 @@ view model =
                                     , img [ src "images/Edit_icon.png", class "w-[10px] h-[10px]" ] []
                                     ]
                                 ]
-                            , div [ class "grow" ] []
-                            , button [ class "p-4 border-2 border-solid border-alto-line" ]
-                                [ span [ class "uppercase text-alto-base font-semibold text-alto-primary opacity-20" ] [ text "Cancel Trip" ]
-                                ]
+                            , div [ class "grow small:pt-2" ] []
+                            , viewButton "Cancel Trip" False []
                             ]
 
                     DriverScreen ->
                         div [ class "flex grow flex-col" ]
-                            [ img [ class "small:object-none small:object-[50%_39%] medium:object-center large:object-contain", src tripData.driver.image ] []
-                            , h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Your Driver" ] [ text "Your Driver" ]
-                            , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.driver.name ]
-                            , div []
-                                [ div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
-                                , p [ class "text-alto-title large:text-alto-base tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
+                            [ 
+                            div [class "flex small:flex-col large:flex-row large:gap-8"][
+                                img [ class "small:object-none small:object-[50%_39%] medium:object-center large:object-none large:object-[50%_39%] large:w-40 large:basis-1/2", src tripData.driver.image ] []
+                                , div [ class "flex flex-col large:basis-1/2"][
+                                    h1 [ class "font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Your Driver" ] [ text "Your Driver" ]
+                                    , h2 [ class "font-pxgrotesklight text-7xl tracking-tighter" ] [ text tripData.driver.name ]
+                                    , div []
+                                        [ div [ class "pt-2 pb-2 border-t-2 border-t-solid border-t-alto-line" ] []
+                                        , p [ class "text-alto-title large:text-alto-base tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
+                                        ]
                                 ]
+                            ]
                             , div [ class "grow" ] []
 
                             -- only enable the contact driver button if they actually have a phone number
