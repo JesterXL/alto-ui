@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Http
 import Json.Decode as JD
 import Time exposing (Posix, Zone, millisToPosix, toHour, toMinute, toSecond, utc)
-
+import Swiper
 
 main : Program JD.Value Model Msg
 main =
@@ -23,20 +23,35 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.none
 
+---- MODEL ----
 
 type alias Model =
     { screen : Screen
     , tripData : Maybe TripData
+    , swipingState : Swiper.SwipingState
+    , userSwipedLeft : Bool
+    , userSwipedRight : Bool
     }
 
 
+{-| We default to showing a loading screen since
+when you startup, she'll attempt to load the data
+from the server.
+-}
 initialModel : Model
 initialModel =
     { screen = Loading
     , tripData = Nothing
+    , swipingState = Swiper.initialSwipingState
+    , userSwipedLeft = False
+    , userSwipedRight = False
     }
 
 
+{-| While this shows all the screens, we _do_ have an error screen
+in case the server fails for whatever reason. We could re-use for
+additional functionality that fails; for now it's just hardcoded.
+-}
 type Screen
     = Loading
     | ErrorScreen
@@ -45,7 +60,23 @@ type Screen
     | VehicleScreen
     | VibeScreen
 
+{-| TripData represents the JSON given in the original assets folder
+with our POSIX addition and money fixes. Some of the JSON had more than
+8 properties which forces us to use a lower quality JSON parser. It would
+work, but the error messages aren't as good, so I combined some types
+together into a single type like Fare & Passengers vs. the flat
+structure the JSON has.
+-}
+type alias TripData =
+    { trip : Trip
+    , driver : Driver
+    , vehicle : Vehicle
+    , vibe : Vibe
+    }
 
+{-| Note for now we've hardcoded the Zone in UTC, but could grab the user's
+timezone from the browser.
+-}
 type alias Trip =
     { arrival : Posix
     , timeZone : Zone
@@ -57,7 +88,9 @@ type alias Trip =
     , notes : String
     }
 
-
+{-| Note our money here is pre-formatted strings from the server; we do NOT futz
+around with this stuff, and "just obey the almighty server" here.
+-}
 type alias Fare =
     { min : String
     , max : String
@@ -69,7 +102,8 @@ type alias Passengers =
     , max : Int
     }
 
-
+{-| These Maybe's are obnoxious; I only handle a few.
+-}
 type alias Location =
     { name : Maybe String
     , street1 : String
@@ -101,18 +135,16 @@ type alias Vehicle =
 type alias Vibe =
     { name : String }
 
+---- UPDATE ----
 
-type alias TripData =
-    { trip : Trip
-    , driver : Driver
-    , vehicle : Vehicle
-    , vibe : Vibe
-    }
-
-
+{-| This application can only do 2 things: Load some data from the server
+and show a particular screen by clicking navigation dots or tabs.
+-}
 type Msg
     = GotTripData (Result Http.Error TripData)
     | ShowScreen Screen
+    | Swiped Swiper.SwipeEvent
+
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -121,6 +153,7 @@ update msg model =
         GotTripData result ->
             case result of
                 Err err ->
+                    -- TODO: add better error showcasing in the error screen
                     let
                         _ =
                             Debug.log "trip data failed" err
@@ -133,7 +166,60 @@ update msg model =
         ShowScreen screen ->
             ( { model | screen = screen }, Cmd.none )
 
+        Swiped evt ->
+            let
+                ( newState, swipedLeft) =
+                    Swiper.hasSwipedLeft evt model.swipingState
+                ( _, swipedRight ) =
+                    Swiper.hasSwipedRight evt model.swipingState
 
+                updatedModel = 
+                    { model | swipingState = newState, userSwipedLeft = swipedLeft, userSwipedRight = swipedRight }
+            in
+                if swipedLeft == True then
+                    goToPreviousScreen updatedModel
+                else if swipedRight == True then
+                    goToNextScreen updatedModel
+                else
+                    ( updatedModel, Cmd.none )
+
+goToPreviousScreen : Model -> ( Model, Cmd Msg )
+goToPreviousScreen model =
+    case model.screen of
+        Loading ->
+            ( { model | screen = Loading }, Cmd.none)
+        ErrorScreen ->
+            ( { model | screen = ErrorScreen }, Cmd.none)
+        TripScreen ->
+            ( { model | screen = TripScreen }, Cmd.none)
+        DriverScreen ->
+            ( { model | screen = TripScreen }, Cmd.none)
+        VehicleScreen ->
+            ( { model | screen = DriverScreen }, Cmd.none)
+        VibeScreen ->
+            ( { model | screen = VehicleScreen }, Cmd.none)
+
+goToNextScreen : Model -> ( Model, Cmd Msg )
+goToNextScreen model =
+    case model.screen of
+        Loading ->
+            ( { model | screen = Loading }, Cmd.none)
+        ErrorScreen ->
+            ( { model | screen = ErrorScreen }, Cmd.none)
+        TripScreen ->
+            ( { model | screen = DriverScreen }, Cmd.none)
+        DriverScreen ->
+            ( { model | screen = VehicleScreen }, Cmd.none)
+        VehicleScreen ->
+            ( { model | screen = VibeScreen }, Cmd.none)
+        VibeScreen ->
+            ( { model | screen = VibeScreen }, Cmd.none)
+
+---- INIT ----
+
+{-| This function runs when our application starts. We setup the default model
+which is to "show the Loading screen" and "we don't have any trip data".
+-}
 init : JD.Value -> ( Model, Cmd Msg )
 init _ =
     ( initialModel
@@ -143,7 +229,9 @@ init _ =
         }
     )
 
-
+{-| All these decoder functions attempt to parse our JSON. If even 1 thing is off,
+it'll fail the parsing and explain exactly which node, and what's wrong with it.
+-}
 tripDataDecoder : JD.Decoder TripData
 tripDataDecoder =
     JD.map4 TripData
@@ -156,6 +244,8 @@ tripDataDecoder =
 tripDecoder : JD.Decoder Trip
 tripDecoder =
     JD.map8 Trip
+        -- The server gives us milliseconds since EPOC, but we need it as an actual Elm Time Posix type so conver it
+        -- We should do additional validation on it, like ensure it's not 0, or negative.
         (JD.field "estimated_arrival_posix" JD.int |> JD.andThen posixDecoder)
         (JD.succeed utc)
         fareDecoder
@@ -204,6 +294,10 @@ driverDecoder =
         (JD.field "name" JD.string)
         (JD.field "image" JD.string)
         (JD.field "bio" JD.string)
+        -- For the Driver screen, you can contact them. However, if the phone
+        -- number is an empty string "" in the JSON, that's pointless. So
+        -- we ensure it's an _actual_ full string. We can do more validation,
+        -- sure, but this is better than nothing.
         (JD.maybe (JD.field "phone" JD.string) |> JD.andThen validatePhone)
 
 validatePhone : Maybe String -> JD.Decoder (Maybe String)
@@ -229,15 +323,16 @@ vibeDecoder =
     JD.map Vibe
         (JD.field "name" JD.string)
 
+---- VIEW ----
 
 view : Model -> Html Msg
 view model =
-    div [ class "w-screen flex flex-col pl-4 pr-4 justify-between" ]
+    div ([ class "w-screen flex flex-col pl-4 pr-4 justify-between" ] ++ Swiper.onSwipeEvents Swiped)
         [ -- TODO/FIXME: This padding causes side-scrolling
           div [ class ("flex flex-col " ++ getBGColor model.screen) ]
             [ div [ class "m-auto pt-4 pb-4" ] [ img [ src "images/Alto_logo.png", class "w-[50px] h-[14px]", attribute "data-logo" "Alto"] [] ]
-            , dots model.screen
-            , tabs model.screen
+            , dots model.screen -- only shown in small and medium breakpoints
+            , tabs model.screen -- only shown in large breakpoint
             ]
         , case model.tripData of
             Nothing ->
@@ -250,7 +345,9 @@ view model =
                             [ text "We failed to load your trip data. Please try again in a few seconds."
                             , button [] [ text "Retry" ]
                             ]
-
+                    -- If we have no trip data, and you somehow navigate to this screen, we'll just
+                    -- assume that you attempted to load data, it failed, but you went away from the
+                    -- error screen and should reload the page.
                     _ ->
                         div [] [ text "Reload." ]
 
@@ -318,6 +415,7 @@ view model =
                                 , p [ class "text-alto-title large:text-alto-base tracking-tight text-alto-primary opacity-75" ] [ text tripData.driver.bio ]
                                 ]
                             , div [ class "grow" ] []
+                            -- only enable the contact driver button if they actually have a phone number
                             , case tripData.driver.phone of
                                 Nothing ->
                                     viewButton "Contact Driver" False []
@@ -341,15 +439,13 @@ view model =
                                     ]
                                 ]
                             , div [ class "grow" ] []
-                            , button [ class "mt-4 p-4 border-2 border-solid border-alto-line w-screen" ]
-                                [ span [ class "uppercase text-alto-base font-semibold text-alto-primary opacity-20" ] [ text "Identify Vehicle" ]
-                                ]
+                            , viewButton "Identify Vehicle" False []
                             ]
 
                     VibeScreen ->
                         div [ class "flex grow flex-col" ]
                             [
-                              img [ class "vibeMask top-4 medium:top-[99px] absolute medium:flex", src "images/Map_overview.png" ] []
+                              img [ class "vibeMask top-4 medium:top-[99px] absolute medium:flex", src "images/Map_overview.png" ] [] -- <-- this guy is so hard...
                             , img [ class "top-60 right-4 absolute", src "images/Map_icon.png" ] []
                             , h1 [ class "pt-[250px] font-pxgrotesk text-alto-title tracking-widest uppercase text-alto-dark pt-8 pb-8", attribute "data-title" "Vibe" ] [ text "Your Trip" ]
                             , h2 [ class "font-pxgrotesklight text-7xl" ]
@@ -358,7 +454,7 @@ view model =
                                 ]
                             , div [class "flex small:flex-col medium:flex-row medium:gap-8"][
                                 
-                                p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ]
+                                p [ class "pb-8 text-alto-base text-alto-primary" ] [ text ("Estimated arrival at " ++ (tripData.trip.dropoff.name |> Maybe.withDefault "???")) ] -- <-- why would drop off location be blank?
                                 , div [ class "flex flex-col pb-12 pt-8 border-t-2 border-t-solid border-t-alto-line medium:pt-0 medium:pb-0 medium:border-t-0" ]
                                     [ p [ class "text-alto-title text-alto-primary opacity-75" ] [ text "Current Vibe" ]
                                     , p [ class "flex flex-row items-center gap-1 text-alto-base font-bold opacity-60" ] [ text tripData.vibe.name ]
@@ -388,7 +484,7 @@ getBGColor screen =
     else
         " "
 
-
+-- the 6 black & gray dots you see to denoate which screen you're on; I made them interactive
 dots : Screen -> Html Msg
 dots screen =
     div [ class "absolute small:top-12 small:right-8 flex small:flex-col medium:flex-row large:hidden gap-1" ]
@@ -399,6 +495,7 @@ dots screen =
         , div [ class (getDotClass screen ErrorScreen), onClick (ShowScreen ErrorScreen), attribute "data-dot" "Error" ] []
         ]
 
+-- at a large breakpoint, you can click on tabs to navigate vs. swiping
 tabs : Screen -> Html Msg
 tabs screen =
     ul [class "small:hidden large:flex flex flex-wrap text-sm font-medium text-center text-alto-secondary border-b border-alto-line"][
@@ -573,7 +670,6 @@ viewButton label enabled attributes =
 disabledButtonStyles : String
 disabledButtonStyles =
     "mt-4 p-4 border-2 border-solid border-alto-line"
-    -- "border-2 border-solid border-alto-line w-screen"
 
 disabledButtonTextStyles : String
 disabledButtonTextStyles =
