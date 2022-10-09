@@ -21,8 +21,27 @@ There is a light [Express.js](https://expressjs.com/) API used to server the JSO
 
 Depending on which breakpoint you're on, you can either click the black dots to navigate between screens, or the tabs. Additionally, if you have mobile emulation on Firefox/Chrome, you can swipe left and right to navigate back and forth between the various screens. There are 3 mobile breakpoints at 278px, 530px, and 745px.
 
-# Tests
+# How to Run the Tests
 
 To run the unit tests for the server, run `npm test`.
 
 To run the end to end tests for the UI, run `npx cypress open`; there are 3 specs you can run. All 3 only need the UI + TailwindCSS compile running, they emulate the server.
+
+# How to Run Linting Rules
+
+To run [elm-review](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) against the `Main.elm` Elm code, run `npm run review`. I've checked in code that passes all linting rules, but just in case, you can violate some of the rules to see it work.
+
+Examples include adding a single item to a list, like in the `viewButton` function. I currently have:
+
+```elm
+(class enabledButtonStyles :: attributes)
+```
+
+But if you use the old school adding 2 lists together:
+```elm
+([class enabledButtonStyles] ++ attributes)
+```
+
+... and run `npm run review`, the Elm Review rules won't like that. I don't have --force/fix on, so you'll have to manually fix, or revert.
+
+I don't have ESLint/TSLint as there isn't enough JavaScript in the `server.js` to justify it for this excercise.
